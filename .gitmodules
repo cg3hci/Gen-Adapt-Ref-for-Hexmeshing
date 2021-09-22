@@ -1,0 +1,3 @@
+[submodule "external/Cinolib"]
+	path = external/Cinolib
+	url = https://github.com/mlivesu/cinolib.git
