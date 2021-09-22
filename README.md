@@ -1,6 +1,5 @@
 # Generalized Adaptive Refinement for Grid-based Hexahedral Meshing
 
-<<<<<<< HEAD
 This is the code we used for the experiments in the paper "**Generalized Adaptive Refinement for Grid-based Hexahedral Meshing**" by L. Pitzalis, [M. Livesu](http://pers.ge.imati.cnr.it/livesu/), [G. Cherchi](http://www.gianmarcocherchi.com), [E. Gobbetti](https://www.crs4.it/it/peopledetails/8/enrico-gobbetti/) and [R. Scateni](https://people.unica.it/riccardoscateni/) (ACM TOG, SIGGRAPH Asia 2021).
 
 <p align="center"><img src="teaser_HD.png"></p>
@@ -15,7 +14,7 @@ brew install cgal
 ```
 sudo apt-get install libcgal-dev
 ```
-|:warning: WARNING: FindGUROBI.cmake is configured to search for gurobi 9.1.x versions. Please edit the "gurobi91" entry in FindGUROBI.cmake if you have a different gurobi version installed in your machine|
+|:warning: WARNING: FindGUROBI.cmake is configured to search for gurobi 9.1.x versions. Please edit the "gurobi91" entry in FindGUROBI.cmake if you have a different gurobi version installed on your machine|
 | --- |
 ## Building
 Clone this repository, including submodules, with:
@@ -41,15 +40,6 @@ Look at the available customizable options with:
 ```
 ./make_grid --help
 ```
-=======
-This is the code we used for the experiments in the paper "**Generalized Adaptive Refinement for Grid-based Hexahedral Meshing**" by L. Pitzalis, [M. Livesu](http://pers.ge.imati.cnr.it/livesu/), [G. Cherchi](http://www.gianmarcocherchi.com), [R. Scateni](https://people.unica.it/riccardoscateni/) and [E. Gobbetti](https://www.crs4.it/it/peopledetails/8/enrico-gobbetti/) (ACM TOG, SIGGRAPH Asia 2021).
-
-|:warning: The code will be available soon |
-| --- |
-
-## Usage
-Work in progress...
->>>>>>> 8b88cddddbf1c2e8a89d2be0af64c2a0a3a643dc
 
 ## Citing us
 If you use our code in your academic projects, please cite our paper using the following BibTeX entry:
