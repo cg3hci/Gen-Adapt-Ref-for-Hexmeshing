@@ -5,7 +5,7 @@ This is the code we used for the experiments in the paper "**Generalized Adaptiv
 <p align="center"><img src="teaser_HD.png"></p>
 
 ## Dependencies
-This project is built on top of some external libraries. Make sure to have them installed on your machine before proceeding with the building process. In addition to [Cinolib](https://github.com/mlivesu/cinolib.git) which is already a submodule of this repository, it is necessary to install [Gurobi](https://www.gurobi.com) and [CGAL](https://www.cgal.org) libraries. Follow the instructions at this [link](https://www.gurobi.com/documentation/6.5/quickstart_linux/software_installation_guid.html) to install Gurobi and run the following command to install CGAL:
+This project is built on top of some external libraries. Make sure to have them installed on your machine before proceeding with the building process. In addition to [Cinolib](https://github.com/mlivesu/cinolib.git), which is already a submodule of this repository, it is necessary to install [Gurobi](https://www.gurobi.com) for ILP resolution and [CGAL](https://www.cgal.org) for the computation of the Shape Diameter Function (SDF). Follow the instructions at this [link](https://www.gurobi.com/documentation/6.5/quickstart_linux/software_installation_guid.html) to install Gurobi and run the following command to install CGAL:
 #### MacOS
 ```
 brew install cgal
