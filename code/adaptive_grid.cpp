@@ -1,3 +1,4 @@
+
 /*****************************************************************************************
  *              MIT License                                                              *
  *                                                                                       *
@@ -140,37 +141,44 @@ void build_polycube(AdaptiveGrid &grid, const cinolib::Tetmesh<> &m, const cinol
 
     build_empty(grid, max_delta);
     const cinolib::vec3d &starting_vert = pc_m.bbox().min;
-    auto s = grid.vert(0);
+    auto s = grid.bbox().min;
+
     for(auto &vert : grid.vector_verts()){
         vert -=s;
-    }    for(auto &vert : grid.vector_verts()){
+    }    
+    for(auto &vert : grid.vector_verts()){
         vert +=starting_vert;
     }
     grid.update_bbox();
 
-
     std::deque<uint> queue;
     for(uint pid=0; pid<grid.num_polys();pid++) queue.push_back(pid);
+
+    cinolib::Octree o;
+    o.build_from_mesh_polys(pc_m);
 
     while(!queue.empty()){
         uint curr = queue.front();
         queue.pop_front();
-
+        uint id;
         if((grid.poly_data(curr).label < min_depth || split_metric(grid, curr, m, pc_m))  && grid.poly_data(curr).label < static_cast<int>(max_depth)){
+
+            if(grid.poly_data(curr).label < min_depth || o.contains(grid.poly_centroid(curr), false, id)){
             split_cell(grid, curr);
             for(uint child : grid.poly_data(curr).children){
                 queue.push_back(child);
             }
         }
+        }
     }
 
-    cinolib::Octree o;
-    o.build_from_mesh_polys(pc_m);
+    //cinolib::Octree o;
+    //o.build_from_mesh_polys(pc_m);
     for(uint pid=0; pid<grid.num_polys(); pid++){
         if(grid.poly_data(pid).label == min_depth){
             uint id;
-            if(o.contains(grid.poly_centroid(pid), false, id)){
-                grid.poly_data(pid).is_inside_polycube=true;
+            if(!o.contains(grid.poly_centroid(pid), false, id)){
+                grid.poly_data(pid).is_inside_polycube=false;
             }
         }
     }
@@ -420,7 +428,7 @@ void strong_balancing(AdaptiveGrid &grid)
                 std::set<uint> neighbors;
                 for(uint vid : grid.poly_verts_id(child)){
                     for(uint neigh : grid.adj_v2p(vid)){
-                        if((neigh != child) && grid.poly_data(neigh).is_leaf && (grid.poly_data(neigh).label < grid.poly_data(child).label))
+                        if((neigh != child) && grid.poly_data(neigh).is_leaf && (grid.poly_data(neigh).label < grid.poly_data(child).label) && grid.poly_data(neigh).is_inside_polycube)
                             neighbors.insert(neigh);
                     }
                 }
@@ -463,10 +471,10 @@ void balancing(AdaptiveGrid &grid)
        queue.pop_front();
 
        for(uint child : grid.poly_data(curr).children){
-           if(grid.poly_data(child).is_leaf){
+           if(grid.poly_data(child).is_leaf && grid.poly_data(child).is_inside_polycube){
                for(uint dir=0; dir<6; dir++){
                    int neigh = get_neighbor_of_greater_or_equal_size(grid, child, dir);
-                   if(neigh == -1) continue;
+                   if(neigh == -1 || !grid.poly_data(neigh).is_inside_polycube) continue;
 
                    int dc = grid.poly_data(child).label;
                    int dn = grid.poly_data(neigh).label;
@@ -551,10 +559,10 @@ bool test_balancing(const AdaptiveGrid &grid){
         queue.pop_front();
 
         for(uint child : grid.poly_data(curr).children){
-            if(grid.poly_data(child).is_leaf){
+            if(grid.poly_data(child).is_leaf && grid.poly_data(child).is_inside_polycube){
                 for(uint dir=0; dir<6; dir++){
                     int neigh = get_neighbor_of_greater_or_equal_size(grid, child, dir);
-                    if(neigh == -1) continue;
+                    if(neigh == -1 || !grid.poly_data(neigh).is_inside_polycube) continue;
 
                     int dc = grid.poly_data(child).label;
                     int dn = grid.poly_data(neigh).label;
@@ -588,7 +596,7 @@ bool test_strong_balancing(const AdaptiveGrid &grid){
                 std::set<uint> neighbors;
                 for(uint vid : grid.poly_verts_id(child)){
                     for(uint neigh : grid.adj_v2p(vid)){
-                        if((neigh != child) && grid.poly_data(neigh).is_leaf && (grid.poly_data(neigh).label < grid.poly_data(child).label))
+                        if((neigh != child) && grid.poly_data(neigh).is_leaf && (grid.poly_data(neigh).label < grid.poly_data(child).label) && grid.poly_data(neigh).is_inside_polycube)
                             neighbors.insert(neigh);
                     }
                 }
@@ -615,7 +623,7 @@ void extract_non_conformal_hexmesh(const AdaptiveGrid &grid, cinolib::Hexmesh<> 
     std::vector<int> poly_labels;
     std::vector<std::vector<uint>> polys;
     for(uint pid=0; pid<grid.num_polys(); pid++){
-        if(grid.poly_data(pid).is_leaf){
+        if(grid.poly_data(pid).is_leaf && grid.poly_data(pid).is_inside_polycube){
             poly_map[pid] = polys.size();
             polys.push_back(grid.poly_verts_id(pid));
             poly_labels.push_back(grid.poly_data(pid).label);
@@ -635,7 +643,7 @@ void extract_submesh_for_refinement(const AdaptiveGrid &grid, cinolib::Hexmesh<>
     std::vector<int> labels;
 
     for(uint pid=0; pid<grid.num_polys(); pid++){
-        if(static_cast<uint>(grid.poly_data(pid).label) == refinement){
+        if(static_cast<uint>(grid.poly_data(pid).label) == refinement && grid.poly_data(pid).is_inside_polycube){
             poly_g2s[pid] = polys.size();
             poly_s2g[polys.size()] = pid;
             polys.push_back(grid.poly_verts_id(pid));
@@ -654,6 +662,8 @@ void extract_submesh_for_refinement(const AdaptiveGrid &grid, cinolib::Hexmesh<>
 }
 
 void refine_minors(AdaptiveGrid &grid, uint pid, const std::vector<uint> &offs, uint target_depth){
+
+    if(!grid.poly_data(pid).is_inside_polycube) return;
 
     split_cell(grid, pid);
 
@@ -708,7 +718,7 @@ std::pair<uint, uint> get_min_and_max_refinement(const AdaptiveGrid &grid){
     int max = 0;
     int min = 1e5;
     for(uint pid=0; pid<grid.num_polys(); pid++){
-        if(grid.poly_data(pid).is_leaf){
+        if(grid.poly_data(pid).is_leaf && grid.poly_data(pid).is_inside_polycube){
             if(grid.poly_data(pid).label > max)
                 max = grid.poly_data(pid).label;
             if(grid.poly_data(pid).label < min)
@@ -724,7 +734,7 @@ std::vector<uint> neighbors(const AdaptiveGrid &grid, uint pid){
     std::vector<uint> neighs;
     for(uint dir=0; dir<6; dir++){
         int neigh = get_neighbor_of_greater_or_equal_size(grid, pid, dir);
-        if(neigh != -1 && grid.poly_data(pid).is_leaf){
+        if(neigh != -1 && grid.poly_data(pid).is_leaf && grid.poly_data(neigh).is_inside_polycube){
             neighs.push_back(neigh);
         }
     }
@@ -735,7 +745,7 @@ uint num_leaves(const AdaptiveGrid &grid)
 {
    uint n_leaves=0;
    for(uint pid=0; pid<grid.num_polys(); pid++){
-       if(grid.poly_data(pid).is_leaf){
+       if(grid.poly_data(pid).is_leaf && grid.poly_data(pid).is_inside_polycube){
            n_leaves++;
        }
    }
@@ -761,7 +771,7 @@ void build(AdaptiveGrid &grid, const cinolib::Hexmesh<> &m_tree)
     }
     grid.update_bbox();
 
-    std::set<cinolib::vec3d, vert_compare> vert_set;
+    std::set<cinolib::vec3d, vert_comparator> vert_set;
     for(const auto &vert : m_tree.vector_verts()){
         vert_set.insert(vert);
     }

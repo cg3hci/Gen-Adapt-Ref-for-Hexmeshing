@@ -39,54 +39,24 @@
  *                                                                                       *
  * ***************************************************************************************/
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef PROJECT_H
+#define PROJECT_H
 
 #include <cinolib/meshes/meshes.h>
+#include <cinolib/winding_number.h>
+#include <cinolib/grid_projector.h>
+#include <cinolib/feature_network.h>
+#include <cinolib/feature_mapping.h>
+#include <cinolib/export_surface.h>
+#include <cinolib/padding.h>
+#include <cinolib/smoother.h>
+#include "../utils.h"
 
-struct vert_comparator{
-    bool operator()(const cinolib::vec3d& a, const cinolib::vec3d& b) const {
 
-       double eps = 1e-6;
-       if(a.x()-b.x() < 0.0 && abs(a.x()-b.x()) > eps){
-           return true;
-       }
-       else if(abs(a.x()-b.x()) < eps){
-           if(a.y()-b.y() < 0.0 && abs(a.y()-b.y()) > eps){
-               return true;
-           }
-           else if(abs(a.y()-b.y()) < eps){
-               if(a.z()-b.z() < 0.0 && abs(a.z()-b.z()) > eps){
-                   return true;
-               }
-           }
-       }
+void project_mesh(cinolib::Hexmesh<> &grid, cinolib::Trimesh<> &target, bool use_grid_projector=false);
+void project_mesh(cinolib::Hexmesh<> &grid, const cinolib::Tetmesh<> &m, const cinolib::Tetmesh<> &pc_m);
 
-       return false;
-    }
-};
+#include "project.cpp"
 
-inline bool eps_equal(const double &a, const double &b)
-{
-    return std::abs(a - b) < 1e-5;
-}
 
-inline std::chrono::time_point<std::chrono::system_clock> startChrono()
-{
-    return std::chrono::system_clock::now();
-}
-
-inline double stopChrono(std::chrono::time_point<std::chrono::system_clock> &start)
-{
-    auto time = std::chrono::system_clock::now() - start;
-    return std::chrono::duration <double, std::milli> (time).count() / 1000;
-}
-
-void remove_unreferenced_vertices(cinolib::AbstractPolyhedralMesh<> &m);
-void remove_unreferenced_vertices(cinolib::AbstractPolygonMesh<> &m);
-void poly_vert_ordering(const std::vector<cinolib::vec3d> &vertices, std::vector<uint> &poly);
-std::vector<std::string> split_string(const std::string &s, char delim);
-
-#include "utils.cpp"
-
-#endif // UTILS_H
+#endif // PROJECT_H

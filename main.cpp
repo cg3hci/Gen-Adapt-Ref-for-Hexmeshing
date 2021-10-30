@@ -44,6 +44,8 @@
 #include <regex>
 #include "surface_grid_maker.h"
 #include "polycube_grid_maker.h"
+#include "hex_transitions_install/install.h"
+#include "mesh_projection/project.h"
 
 int main(int argc, char *argv[]){
 
@@ -54,6 +56,9 @@ int main(int argc, char *argv[]){
     std::regex regex_pc_mesh_path("--input_pc_mesh_path=.*");
     std::regex regex_grid_path("--output_grid_path=.*.mesh");
     std::regex regex_sanity_check("--sanity_check=(true|false)");
+    std::regex regex_install_schemes("--install_schemes=(true|false)");
+    std::regex regex_project_mesh("--project_mesh=(true|false)");
+
     if(argc > 3){
 
         if(std::string(argv[1]) == "--surface"){
@@ -65,6 +70,8 @@ int main(int argc, char *argv[]){
             bool weak_balancing = true;
             bool use_octree = false;
             bool perform_sanity_check = true;
+            bool install_schemes = false;
+            bool project_mesh_ = false;
 
             bool mesh_found, grid_found;
 
@@ -91,7 +98,14 @@ int main(int argc, char *argv[]){
                     std::string bool_string = argument.erase(0, argument.find("=") + 1);
                     perform_sanity_check = bool_string.front() == 't' ? true : false;
                 }
-
+                else if(std::regex_match(argument, regex_install_schemes)){
+                    std::string bool_string = argument.erase(0, argument.find("=") + 1);
+                    install_schemes = bool_string.front() == 't' ? true : false;
+                }
+                else if(std::regex_match(argument, regex_project_mesh)){
+                    std::string bool_string = argument.erase(0, argument.find("=") + 1);
+                    project_mesh_ = bool_string.front() == 't' ? true : false;
+                }
             }
 
             if(!(mesh_found && grid_found)){
@@ -104,6 +118,20 @@ int main(int argc, char *argv[]){
 
             make_grid(m, grid, min_refinement, max_refinement, weak_balancing, use_octree, sdf_split_metric, perform_sanity_check);
             grid.save(grid_save_path.c_str());
+
+            if(install_schemes || project_mesh_){
+                cinolib::Polyhedralmesh<> pm(grid_save_path.c_str());
+                cinolib::Hexmesh<> conforming_grid;
+                bool result = install_schemes_to_grid(pm, conforming_grid, true);
+                std::vector<std::string> split_extension= split_string(grid_save_path, '.');
+                if(result) conforming_grid.save((split_extension[0]+"_conforming.mesh").c_str());
+
+                if(project_mesh_){
+                    project_mesh(conforming_grid, m);
+                    conforming_grid.save((split_extension[0]+"_projected.mesh").c_str()); 
+                }
+            }
+            
         }
 
 
@@ -117,6 +145,8 @@ int main(int argc, char *argv[]){
             bool weak_balancing = true;
             bool use_octree = false;
             bool perform_sanity_check = true;
+            bool install_schemes = false;
+            bool project_mesh_ = false;
             bool mesh_found, pc_mesh_found, grid_found;
 
             for(int i=2;i<argc;i++){
@@ -146,6 +176,14 @@ int main(int argc, char *argv[]){
                     std::string bool_string = argument.erase(0, argument.find("=") + 1);
                     perform_sanity_check = bool_string.front() == 't' ? true : false;
                 }
+                else if(std::regex_match(argument, regex_install_schemes)){
+                    std::string bool_string = argument.erase(0, argument.find("=") + 1);
+                    install_schemes = bool_string.front() == 't' ? true : false;
+                }
+                else if(std::regex_match(argument, regex_project_mesh)){
+                    std::string bool_string = argument.erase(0, argument.find("=") + 1);
+                    project_mesh_ = bool_string.front() == 't' ? true : false;
+                }
             }
 
             if(!(mesh_found && grid_found && pc_mesh_found)){
@@ -166,8 +204,21 @@ int main(int argc, char *argv[]){
             externals_path += "external_polys.txt";
             grid.mesh_data().filename = externals_path;
 
-            make_grid(m, pc_m, grid, min_refinement, max_refinement, weak_balancing, use_octree, polycube_distortion_split_metric, perform_sanity_check);
+            make_grid(m, pc_m, grid, min_refinement, max_refinement, weak_balancing, false, polycube_distortion_split_metric, perform_sanity_check);
             grid.save(grid_save_path.c_str());
+
+            if(install_schemes || project_mesh_){
+                cinolib::Polyhedralmesh<> pm(grid_save_path.c_str());
+                cinolib::Hexmesh<> conforming_grid;
+                bool result = install_schemes_to_grid(pm, conforming_grid, false);
+                std::vector<std::string> split_extension= split_string(grid_save_path, '.');
+                if(result) conforming_grid.save((split_extension[0]+"_conforming.mesh").c_str());
+
+                if(project_mesh_){
+                    project_mesh(conforming_grid, m, pc_m);
+                    conforming_grid.save((split_extension[0]+"_projected.mesh").c_str()); 
+                }
+            }
 
         }
 
@@ -182,7 +233,10 @@ int main(int argc, char *argv[]){
         std::cout<<"--max_refinement=VALUE (optional, default 8)"<<std::endl;
         std::cout<<"--use_octree (optional). Use the algorithmic pairing process"<<std::endl;
         std::cout<<"--weak_balancing | --strong_balancing (optional, default weak_balancing)"<<std::endl;
-        std::cout<<"--sanity_check=BOOL (optional, default truie). Test if the final mesh is paired correctly"<<std::endl;
+        std::cout<<"--sanity_check=BOOL (optional, default true). Test if the final mesh is paired correctly"<<std::endl;
+        std::cout<<"--install_schemes=BOOL (optional, default false). Install the transition schemes to get a conforming all-hexa grid"<<std::endl;
+        std::cout<<"--project_mesh=BOOL (optional, default false). Project the grid on the target mesh"<<std::endl;
+
     }
     else{
         std::cerr<<"Wrong number of parameter. Run with --help for more information";

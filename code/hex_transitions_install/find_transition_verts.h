@@ -39,54 +39,16 @@
  *                                                                                       *
  * ***************************************************************************************/
 
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef FIND_TRANSITION_VERTS_H
+#define FIND_TRANSITION_VERTS_H
 
 #include <cinolib/meshes/meshes.h>
+#include <gurobi_c++.h>
+#include "../utils.h"
 
-struct vert_comparator{
-    bool operator()(const cinolib::vec3d& a, const cinolib::vec3d& b) const {
+uint div_factor=4;
+void find_t_vertices(cinolib::AbstractPolyhedralMesh<> &m, uint div_factor=4);
 
-       double eps = 1e-6;
-       if(a.x()-b.x() < 0.0 && abs(a.x()-b.x()) > eps){
-           return true;
-       }
-       else if(abs(a.x()-b.x()) < eps){
-           if(a.y()-b.y() < 0.0 && abs(a.y()-b.y()) > eps){
-               return true;
-           }
-           else if(abs(a.y()-b.y()) < eps){
-               if(a.z()-b.z() < 0.0 && abs(a.z()-b.z()) > eps){
-                   return true;
-               }
-           }
-       }
+#include "find_transition_verts.cpp"
 
-       return false;
-    }
-};
-
-inline bool eps_equal(const double &a, const double &b)
-{
-    return std::abs(a - b) < 1e-5;
-}
-
-inline std::chrono::time_point<std::chrono::system_clock> startChrono()
-{
-    return std::chrono::system_clock::now();
-}
-
-inline double stopChrono(std::chrono::time_point<std::chrono::system_clock> &start)
-{
-    auto time = std::chrono::system_clock::now() - start;
-    return std::chrono::duration <double, std::milli> (time).count() / 1000;
-}
-
-void remove_unreferenced_vertices(cinolib::AbstractPolyhedralMesh<> &m);
-void remove_unreferenced_vertices(cinolib::AbstractPolygonMesh<> &m);
-void poly_vert_ordering(const std::vector<cinolib::vec3d> &vertices, std::vector<uint> &poly);
-std::vector<std::string> split_string(const std::string &s, char delim);
-
-#include "utils.cpp"
-
-#endif // UTILS_H
+#endif // FIND_TRANSITION_VERTS_H

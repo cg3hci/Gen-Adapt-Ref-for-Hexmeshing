@@ -53,13 +53,13 @@ struct AdaptiveGridAttributes : cinolib::Polyhedron_std_attributes{
     int father;
     std::vector<uint> children;
     bool is_leaf;
-    bool is_inside_polycube;
+    bool is_inside_polycube=true;
 };
 
 typedef cinolib::Hexmesh<cinolib::Mesh_std_attributes, cinolib::Vert_std_attributes, cinolib::Edge_std_attributes, cinolib::Polygon_std_attributes, AdaptiveGridAttributes> AdaptiveGrid;
 
 
-static std::map<cinolib::vec3d, uint, vert_compare> v_map;
+static std::map<cinolib::vec3d, uint, vert_comparator> v_map;
 
 void build_empty_bbox(AdaptiveGrid &grid, const cinolib::AABB &bbox);
 void build_empty(AdaptiveGrid &grid, double size);

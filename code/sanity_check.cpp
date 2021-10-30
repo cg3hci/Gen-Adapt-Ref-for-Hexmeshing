@@ -134,7 +134,7 @@ bool sanityCheck(std::vector<std::pair<cinolib::Quadmesh<>, uint>> &ref_meshes)
 void extract_quadmesh_for_refinement(const cinolib::Hexmesh<> &m, uint ref, cinolib::Quadmesh<> &qm){
 
     std::vector<std::vector<uint>> polys;
-    std::map<cinolib::vec3d, uint, vert_compare> v_map;
+    std::map<cinolib::vec3d, uint, vert_comparator> v_map;
     for(uint vid=0; vid<m.num_verts(); vid++) v_map[m.vert(vid)] = vid;
 
     for(uint pid=0; pid<m.num_polys();pid++){
