@@ -195,15 +195,6 @@ int main(int argc, char *argv[]){
             cinolib::Tetmesh<> pc_m(pc_mesh_path.c_str());
             cinolib::Hexmesh<> grid;
 
-            std::vector<std::string> split = split_string(grid_save_path, '/');
-            std::string externals_path;
-            if(grid_save_path[0] == '/') externals_path += "/";
-            for(uint i=0; i<split.size()-1; i++){
-                externals_path+= split[i]+"/";
-            }
-            externals_path += "external_polys.txt";
-            grid.mesh_data().filename = externals_path;
-
             make_grid(m, pc_m, grid, min_refinement, max_refinement, weak_balancing, false, polycube_distortion_split_metric, perform_sanity_check);
             grid.save(grid_save_path.c_str());
 
@@ -228,10 +219,10 @@ int main(int argc, char *argv[]){
     else if(argc == 2 && std::string(argv[1]) == "--help"){
         std::cout<<"usage: ./grid_maker (--surface | --polycube) --input_mesh_path=MESH_PATH --output_grid_path=GRID_PATH [Options]"<<std::endl;
         std::cout<<"Options:"<<std::endl;
-        std::cout<<"--input_pc_mesh_path=PATH (required for polycube). Specify the path of the polycube map"<<std::endl;
+        std::cout<<"--input_pc_mesh_path=PATH (required for polycube pipeline). Specify the path of the polycube map"<<std::endl;
         std::cout<<"--min_refinement=VALUE (optional, default 0[5 for polycube])"<<std::endl;
         std::cout<<"--max_refinement=VALUE (optional, default 8)"<<std::endl;
-        std::cout<<"--use_octree (optional). Use the algorithmic pairing process"<<std::endl;
+        std::cout<<"--use_octree (optional). Use the algorithmic pairing process (for surface pipeline only)"<<std::endl;
         std::cout<<"--weak_balancing | --strong_balancing (optional, default weak_balancing)"<<std::endl;
         std::cout<<"--sanity_check=BOOL (optional, default true). Test if the final mesh is paired correctly"<<std::endl;
         std::cout<<"--install_schemes=BOOL (optional, default false). Install the transition schemes to get a conforming all-hexa grid"<<std::endl;
