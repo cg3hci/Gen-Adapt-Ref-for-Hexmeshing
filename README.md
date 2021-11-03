@@ -1,6 +1,6 @@
 # Generalized Adaptive Refinement for Grid-based Hexahedral Meshing
 
-This is the code we used for the experiments in the paper "**Generalized Adaptive Refinement for Grid-based Hexahedral Meshing**" by L. Pitzalis, [M. Livesu](http://pers.ge.imati.cnr.it/livesu/), [G. Cherchi](http://www.gianmarcocherchi.com), [E. Gobbetti](https://www.crs4.it/it/peopledetails/8/enrico-gobbetti/) and [R. Scateni](https://people.unica.it/riccardoscateni/) (ACM TOG, SIGGRAPH Asia 2021).
+This is the code we used for the experiments in the paper "**Generalized Adaptive Refinement for Grid-based Hexahedral Meshing**" by [L. Pitzalis](pizza1994.github.io), [M. Livesu](http://pers.ge.imati.cnr.it/livesu/), [G. Cherchi](http://www.gianmarcocherchi.com), [E. Gobbetti](https://www.crs4.it/it/peopledetails/8/enrico-gobbetti/) and [R. Scateni](https://people.unica.it/riccardoscateni/) (ACM TOG, SIGGRAPH Asia 2021).
 
 <p align="center"><img src="teaser_HD.png"></p>
 
