@@ -217,7 +217,7 @@ int main(int argc, char *argv[]){
     }
 
     else if(argc == 2 && std::string(argv[1]) == "--help"){
-        std::cout<<"usage: ./grid_maker (--surface | --polycube) --input_mesh_path=MESH_PATH --output_grid_path=GRID_PATH [Options]"<<std::endl;
+        std::cout<<"usage: ./make_grid (--surface | --polycube) --input_mesh_path=MESH_PATH --output_grid_path=GRID_PATH [Options]"<<std::endl;
         std::cout<<"Options:"<<std::endl;
         std::cout<<"--input_pc_mesh_path=PATH (required for polycube pipeline). Specify the path of the polycube map"<<std::endl;
         std::cout<<"--min_refinement=VALUE (optional, default 0[5 for polycube])"<<std::endl;
