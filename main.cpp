@@ -66,7 +66,7 @@ int main(int argc, char *argv[]){
             std::string mesh_path;
             std::string grid_save_path;
             uint min_refinement = 0;
-            uint max_refinement = 8;
+            uint max_refinement = 15;
             bool weak_balancing = true;
             bool use_octree = false;
             bool perform_sanity_check = true;
